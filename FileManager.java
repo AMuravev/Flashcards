@@ -8,7 +8,7 @@ public class FileManager {
 
     final static String PATH = "";
 
-    public void exportLogs(List<Logs> logs, String filename) throws IOException {
+    public static void exportLogs(List<Logs> logs, String filename) throws IOException {
 
         File file = new File(PATH + filename);
 
@@ -17,7 +17,7 @@ public class FileManager {
         }
     }
 
-    public void exportFile(List<Card> cardCollection, String filename) throws IOException {
+    public static void exportFile(List<Card> cardCollection, String filename) throws IOException {
 
         FileOutputStream f = new FileOutputStream(new File(PATH + filename));
         ObjectOutputStream o = new ObjectOutputStream(f);
@@ -27,7 +27,7 @@ public class FileManager {
         }
     }
 
-    public List<Card> importFile(String filename) throws IOException, ClassNotFoundException {
+    public static List<Card> importFile(String filename) throws IOException, ClassNotFoundException {
 
         List<Card> _cardCollection = new ArrayList<>();
         FileInputStream fi = new FileInputStream(new File(PATH + filename));

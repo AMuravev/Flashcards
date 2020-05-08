@@ -79,148 +79,16 @@ public class App {
                 commandAsk(str);
                 break;
             case RESET:
-                resetStats();
+                commandResetStats();
                 break;
             case HARDER_CARDS:
-                findHarderCards();
+                commandShowHarderCards();
                 break;
             case EXIT:
                 commandExit();
                 break;
             default:
                 setStateDefault();
-        }
-    }
-
-    private void findHarderCards() {
-
-        try {
-
-            List<Card> cards = cardCollection.stream().
-                    flatMap(Stream::ofNullable).
-                    filter(c -> c.getMistake() > 0)
-                    .collect(Collectors.groupingBy(
-                            Card::getMistake,
-                            TreeMap::new,
-                            Collectors.toList()
-                    ))
-                    .lastEntry()
-                    .getValue();
-
-            if (cards.size() == 1) {
-                printMessage("The hardest card is \"" + cards.get(0).getTerm() + "\". You have " + cards.get(0).getMistake() + " errors answering it.");
-            } else {
-                String terms = cards.stream().map(Card::getTerm).collect(Collectors.joining("\", \"", "\"", "\""));
-                printMessage("The hardest cards are " + terms + ". You have " + cards.get(0).getMistake() + " errors answering them.");
-            }
-            setStateDefault();
-
-        } catch (NullPointerException e) {
-            printMessage("There are no cards with errors.");
-            setStateDefault();
-        }
-    }
-
-    private void resetStats() {
-        cardCollection.forEach(Card::resetMistake);
-        printMessage("Card statistics has been reset.");
-        setStateDefault();
-    }
-
-    private void commandExchange(Command command) {
-
-        switch (command) {
-            case IMPORT:
-                printMessage("File name:");
-                setState(State.IMPORT);
-                break;
-            case EXPORT:
-                printMessage("File name:");
-                setState(State.EXPORT);
-                break;
-            case LOGS:
-                printMessage("File name:");
-                setState(State.EXPORT_LOGS);
-                break;
-            default:
-                setStateDefault();
-        }
-    }
-
-    private void exportFile(String str) {
-
-        FileManager fileManager = new FileManager();
-
-        try {
-            fileManager.exportFile(cardCollection, str);
-            printMessage(cardCollection.size() + " cards have been saved.");
-            setStateDefault();
-        } catch (IOException e) {
-            printMessage(e.getMessage());
-            setStateDefault();
-        }
-    }
-
-    private void exportLogsFile(String str) {
-
-        FileManager fileManager = new FileManager();
-
-        try {
-            fileManager.exportLogs(logs, str);
-            printMessage("The log has been saved.");
-            setStateDefault();
-        } catch (IOException e) {
-            printMessage(e.getMessage());
-            setStateDefault();
-        }
-    }
-
-    private void importFile(String str) {
-
-        FileManager fileManager = new FileManager();
-
-        try {
-            List<Card> importCC = fileManager.importFile(str);
-
-            for (Card card : importCC) {
-
-                if (cardCollection.contains(card)) {
-                    cardCollection.set(cardCollection.indexOf(card), card);
-                } else {
-                    cardCollection.add(card);
-                }
-
-            }
-            printMessage(importCC.size() + " cards have been loaded.");
-            setStateDefault();
-
-        } catch (IOException | ClassNotFoundException e) {
-            printMessage("File not found.");
-            setStateDefault();
-        }
-    }
-
-    public void commandExit() {
-        printMessage("Bye bye!");
-        setState(State.EXIT);
-    }
-
-    private void commandAsk(String str) {
-
-        switch (getState()) {
-            case START:
-                printMessage("How many times to ask?");
-                setState(State.ASK_PROCESS_QTY);
-                break;
-            case ASK_PROCESS_QTY:
-                setRandomCards(str);
-            case ASK_PROCESS_ASK:
-                ask();
-                break;
-            case ASK_PROCESS_CHECK:
-                checkAnswer(str);
-            default:
-                break;
         }
     }
 
@@ -263,17 +131,132 @@ public class App {
         }
     }
 
+    private void commandAsk(String str) {
+
+        switch (getState()) {
+            case START:
+                printMessage("How many times to ask?");
+                setState(State.ASK_PROCESS_QTY);
+                break;
+            case ASK_PROCESS_QTY:
+                setRandomCards(str);
+            case ASK_PROCESS_ASK:
+                ask();
+                break;
+            case ASK_PROCESS_CHECK:
+                checkAnswer(str);
+            default:
+                break;
+        }
+    }
+
+    private void commandExchange(Command command) {
+
+        switch (command) {
+            case IMPORT:
+                printMessage("File name:");
+                setState(State.IMPORT);
+                break;
+            case EXPORT:
+                printMessage("File name:");
+                setState(State.EXPORT);
+                break;
+            case LOGS:
+                printMessage("File name:");
+                setState(State.EXPORT_LOGS);
+                break;
+            default:
+                setStateDefault();
+        }
+    }
+
+    private void commandShowHarderCards() {
+
+        try {
+
+            List<Card> cards = cardCollection.stream().flatMap(Stream::ofNullable)
+                    .filter(c -> c.getMistake() > 0)
+                    .collect(Collectors.groupingBy(Card::getMistake, TreeMap::new, Collectors.toList()))
+                    .lastEntry()
+                    .getValue();
+
+            if (cards.size() == 1) {
+                printMessage("The hardest card is \"" + cards.get(0).getTerm() + "\". You have " + cards.get(0).getMistake() + " errors answering it.");
+            } else {
+                String terms = cards.stream().map(Card::getTerm).collect(Collectors.joining("\", \"", "\"", "\""));
+                printMessage("The hardest cards are " + terms + ". You have " + cards.get(0).getMistake() + " errors answering them.");
+            }
+            setStateDefault();
+
+        } catch (NullPointerException e) {
+            printMessage("There are no cards with errors.");
+            setStateDefault();
+        }
+    }
+
+    private void commandResetStats() {
+        cardCollection.forEach(Card::resetMistake);
+        printMessage("Card statistics has been reset.");
+        setStateDefault();
+    }
+
+    public void commandExit() {
+        printMessage("Bye bye!");
+        setState(State.EXIT);
+    }
+
+    private void exportFile(String str) {
+
+        try {
+            FileManager.exportFile(cardCollection, str);
+            printMessage(cardCollection.size() + " cards have been saved.");
+            setStateDefault();
+        } catch (IOException e) {
+            printMessage(e.getMessage());
+            setStateDefault();
+        }
+    }
+
+    private void exportLogsFile(String str) {
+
+        try {
+            FileManager.exportLogs(logs, str);
+            printMessage("The log has been saved.");
+            setStateDefault();
+        } catch (IOException e) {
+            printMessage(e.getMessage());
+            setStateDefault();
+        }
+    }
+
+    private void importFile(String str) {
+
+        try {
+            List<Card> importCC = FileManager.importFile(str);
+
+            for (Card card : importCC) {
+
+                if (cardCollection.contains(card)) {
+                    cardCollection.set(cardCollection.indexOf(card), card);
+                } else {
+                    cardCollection.add(card);
+                }
+
+            }
+            printMessage(importCC.size() + " cards have been loaded.");
+            setStateDefault();
+
+        } catch (IOException | ClassNotFoundException e) {
+            printMessage("File not found.");
+            setStateDefault();
+        }
+    }
+
     private void setRandomCards(String count) {
 
         int countInt = Integer.parseInt(count);
 
         List<Card> _list = new ArrayList<>(cardCollection);
-
-//        Collections.shuffle(list);
-//
-//        for (int i = 0; i < countInt; i++) {
-//            randTerms.add(list.get(i));
-//        }
 
         int[] randomIds = new Random().ints(countInt, 0, _list.size()).toArray();
 
