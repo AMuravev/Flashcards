@@ -14,8 +14,7 @@ public class Main {
             try {
                 app.input(scanner.nextLine());
             } catch (NoSuchElementException e) {
-                app.setState(State.EXIT);
-                System.out.println("Bye Bye!");
+                app.commandExit();
             }
         }
     }

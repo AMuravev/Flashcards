@@ -1,31 +1,21 @@
 package flashcards;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Logs {
 
-    private final TreeMap<String, String> logs;
+    private final String date;
+    private final String message;
 
-    public Logs() {
-        this.logs = new TreeMap<>();
+    public Logs(String message) {
+        this.date = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+        this.message = message;
     }
 
-    public String write(String string) {
-
-        Date date = new Date();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        String strDate = dateFormat.format(date);
-
-        logs.put(strDate, string);
-        return string;
-    }
-
-    public TreeMap<String, String> getLogs() {
-        return logs;
+    @Override
+    public String toString() {
+        return "Date:" + date + " Message:" + message;
     }
 }

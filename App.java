@@ -11,17 +11,19 @@ public class App {
 
     private final List<Card> cardCollection;
     private final List<Card> randCards;
-    private final Logs logs;
+    private final List<Logs> logs;
 
     public App() {
 
         this.cardCollection = new ArrayList<>();
         this.randCards = new ArrayList<>();
-        this.logs = new Logs();
+        this.logs = new ArrayList<>();
         setStateDefault();
     }
 
     public void input(String str) {
+
+        logs.add(new Logs(str));
 
         switch (getState()) {
             case START:
@@ -32,13 +34,13 @@ public class App {
                 commandAdd(str);
                 break;
             case IMPORT:
-                commandImport(str);
+                importFile(str);
                 break;
             case EXPORT:
-                commandExport(str);
+                exportFile(str);
                 break;
-            case LOGS_EXPORT:
-                commandExportLog(str);
+            case EXPORT_LOGS:
+                exportLogsFile(str);
                 break;
             case REMOVE:
                 commandRemove(str);
@@ -69,19 +71,15 @@ public class App {
                 commandRemove(str);
                 break;
             case IMPORT:
-                commandImport(str);
-                break;
             case EXPORT:
-                commandExport(str);
+            case LOGS:
+                commandExchange(command);
                 break;
             case ASK:
                 commandAsk(str);
                 break;
-            case LOGS:
-                commandExportLog(str);
-                break;
             case RESET:
-                resetLogs();
+                resetStats();
                 break;
             case HARDER_CARDS:
                 findHarderCards();
@@ -113,7 +111,6 @@ public class App {
                 printMessage("The hardest card is \"" + cards.get(0).getTerm() + "\". You have " + cards.get(0).getMistake() + " errors answering it.");
             } else {
                 String terms = cards.stream().map(Card::getTerm).collect(Collectors.joining("\", \"", "\"", "\""));
-                //TODO: check
                 printMessage("The hardest cards are " + terms + ". You have " + cards.get(0).getMistake() + " errors answering them.");
             }
             setStateDefault();
@@ -124,53 +121,29 @@ public class App {
         }
     }
 
-    private void resetLogs() {
+    private void resetStats() {
         cardCollection.forEach(Card::resetMistake);
         printMessage("Card statistics has been reset.");
         setStateDefault();
     }
 
-    private void exportLogsFile(String str) {
+    private void commandExchange(Command command) {
 
-        FileManager fileManager = new FileManager();
-
-        try {
-            fileManager.exportLogs(logs, str);
-            printMessage("The log has been saved.");
-            setStateDefault();
-        } catch (IOException e) {
-            printMessage(e.getMessage());
-            setStateDefault();
-        }
-    }
-
-    private void commandExportLog(String str) {
-
-        switch (getState()) {
-            case START:
+        switch (command) {
+            case IMPORT:
                 printMessage("File name:");
-                setState(State.LOGS_EXPORT);
+                setState(State.IMPORT);
                 break;
-            case LOGS_EXPORT:
-                exportLogsFile(str);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void commandExport(String str) {
-
-        switch (getState()) {
-            case START:
+            case EXPORT:
                 printMessage("File name:");
                 setState(State.EXPORT);
                 break;
-            case EXPORT:
-                exportFile(str);
+            case LOGS:
+                printMessage("File name:");
+                setState(State.EXPORT_LOGS);
                 break;
             default:
-                break;
+                setStateDefault();
         }
     }
 
@@ -188,18 +161,17 @@ public class App {
         }
     }
 
-    private void commandImport(String str) {
+    private void exportLogsFile(String str) {
 
-        switch (getState()) {
-            case START:
-                printMessage("File name:");
-                setState(State.IMPORT);
-                break;
-            case IMPORT:
-                importFile(str);
-                break;
-            default:
-                break;
+        FileManager fileManager = new FileManager();
+
+        try {
+            fileManager.exportLogs(logs, str);
+            printMessage("The log has been saved.");
+            setStateDefault();
+        } catch (IOException e) {
+            printMessage(e.getMessage());
+            setStateDefault();
         }
     }
 
@@ -228,7 +200,7 @@ public class App {
         }
     }
 
-    private void commandExit() {
+    public void commandExit() {
         printMessage("Bye bye!");
         setState(State.EXIT);
     }
@@ -381,12 +353,13 @@ public class App {
     }
 
     public void setStateDefault() {
-        printMessage(logs.write("Input the action (add, remove, import, export, ask, exit, log, hardest card, reset stats):"));
+        printMessage("Input the action (add, remove, import, export, ask, exit, log, hardest card, reset stats):");
         setState(State.START);
     }
 
     public void printMessage(String string) {
-        System.out.println(logs.write(string));
+        logs.add(new Logs(string));
+        System.out.println(string);
     }
 
     public State getState() {

@@ -10,6 +10,6 @@ public enum State {
     REMOVE,
     IMPORT,
     EXPORT,
-    LOGS_EXPORT,
+    EXPORT_LOGS,
     EXIT
 }
