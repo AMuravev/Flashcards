@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
 
         final Scanner scanner = new Scanner(System.in);
-        final App app = new App();
+        final App app = new App(args);
 
         while (app.getState() != State.EXIT) {
 

@@ -9,15 +9,31 @@ public class App {
 
     private State state;
 
+    private String fileToExport;
     private final List<Card> cardCollection;
     private final List<Card> randCards;
     private final List<Logs> logs;
 
-    public App() {
-
+    public App(String... args) {
         this.cardCollection = new ArrayList<>();
         this.randCards = new ArrayList<>();
         this.logs = new ArrayList<>();
+        this.fileToExport = null;
+        initState(args);
+    }
+
+    private void initState(String... args) {
+
+        for (int i = 0; i < args.length - 1; i += 2) {
+
+            if (args[i].equals("-import")) {
+                importFile(args[i + 1]);
+            }
+
+            if (args[i].equals("-export")) {
+                fileToExport = args[i + 1];
+            }
+        }
         setStateDefault();
     }
 
@@ -35,9 +51,11 @@ public class App {
                 break;
             case IMPORT:
                 importFile(str);
+                setStateDefault();
                 break;
             case EXPORT:
                 exportFile(str);
+                setStateDefault();
                 break;
             case EXPORT_LOGS:
                 exportLogsFile(str);
@@ -202,6 +220,9 @@ public class App {
 
     public void commandExit() {
         printMessage("Bye bye!");
+        if (fileToExport != null) {
+            exportFile(fileToExport);
+        }
         setState(State.EXIT);
     }
 
@@ -210,10 +231,8 @@ public class App {
         try {
             FileManager.exportFile(cardCollection, str);
             printMessage(cardCollection.size() + " cards have been saved.");
-            setStateDefault();
         } catch (IOException e) {
             printMessage(e.getMessage());
-            setStateDefault();
         }
     }
 
@@ -244,11 +263,9 @@ public class App {
 
             }
             printMessage(importCC.size() + " cards have been loaded.");
-            setStateDefault();
 
         } catch (IOException | ClassNotFoundException e) {
             printMessage("File not found.");
-            setStateDefault();
         }
     }
 
